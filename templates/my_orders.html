@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Pharma Choice</title>
+    <link href="../static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/user/dashboard">Dashboard</a>
+        <a href="/user/drugs">All Drugs</a>
+        <a href="/user/cart">Cart</a>
+        <a href="/user/myorders">My Orders</a>
+        <a href="/logout">Logout</a>
+    </div>
+    
+    <div class="container">
+        <h2>My Orders</h2>
+        
+        {% if orders %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Drug</th>
+                    <th>Category</th>
+                    <th>Qty</th>
+                    <th>Price (₹)</th>
+                    <th>Total (₹)</th>
+                    <th>Order Date</th>
+                    <th>Status</th>
+                </thead
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.drug_name }}</td>
+                    <td>{{ order.category }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>{{ order.price }}</td>
+                    <td>{{ order.total_amount }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td class="status-{{ order.status|lower|replace(' ', '') }}">{{ order.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-orders">
+            <p>No orders yet.</p>
+            <a href="/user/drugs" class="btn-continue">Start Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

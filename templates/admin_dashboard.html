@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Pharma Choice</title>
+    <link href="../static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/addcategory">Add Category</a>
+        <a href="/admin/viewcategory">View Category</a>
+        <a href="/admin/adddrug">Add Drug</a>
+        <a href="/admin/viewdrugs">View Drugs</a>
+        <a href="/admin/vieworders">View Orders</a>
+        <a href="/logout">Logout</a>
+    </div>
+    
+    <div class="dashboard-container">
+        <h2>Admin Dashboard</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>👥 Total Users</h3>
+                <p>{{ stats.total_users }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>📁 Categories</h3>
+                <p>{{ stats.total_categories }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>💊 Drugs</h3>
+                <p>{{ stats.total_drugs }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>📦 Orders</h3>
+                <p>{{ stats.total_orders }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>💰 Revenue</h3>
+                <p>₹ {{ stats.total_revenue }}</p>
+            </div>
+        </div>
+        
+        <div class="low-stock-section">
+            <h3>🔴 Low Stock Alerts (Below 10)</h3>
+            {% if low_stock %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Drug Name</th>
+                        <th>Available Stock</th>
+                        <th>Last Updated</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for drug in low_stock %}
+                    <tr>
+                        <td>{{ drug.drug_name }}</td>
+                        <td class="low-stock">{{ drug.available_stock }}</td>
+                        <td>{{ drug.last_updated }}</td>
+                        <td><a href="/admin/viewdrugs" class="btn-restock">Restock Now</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert-success">✅ All stocks are sufficient.</div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

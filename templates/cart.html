@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart - Pharma Choice</title>
+    <link href="../static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/user/dashboard">Dashboard</a>
+        <a href="/user/drugs">All Drugs</a>
+        <a href="/user/cart">Cart</a>
+        <a href="/user/myorders">My Orders</a>
+        <a href="/logout">Logout</a>
+    </div>
+    
+    <div class="container">
+        <h2>My Cart</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% if cart_items %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Drug Name</th>
+                    <th>Category</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </thead
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.drug_name }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.final_price }}</td>
+                    <td>₹{{ item.item_total }}</td>
+                    <td><a href="/user/removefromcart/{{ item.cart_id }}" class="btn-remove" onclick="return confirm('Remove from cart?')">Remove</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4"><strong>Grand Total</strong></td>
+                    <td><strong>₹{{ total }}</strong></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+        
+        <div class="cart-actions">
+            <a href="/user/drugs" class="btn-continue">Continue Shopping</a>
+            <form action="/user/checkout" method="POST" style="display: inline;">
+                <button type="submit" class="btn-checkout">Confirm Order</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="empty-cart">
+            <p>Your cart is empty.</p>
+            <a href="/user/drugs" class="btn-continue">Start Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

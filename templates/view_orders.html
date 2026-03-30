@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Orders - Pharma Choice</title>
+    <link href="../static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/addcategory">Add Category</a>
+        <a href="/admin/viewcategory">View Category</a>
+        <a href="/admin/adddrug">Add Drug</a>
+        <a href="/admin/viewdrugs">View Drugs</a>
+        <a href="/admin/vieworders">View Orders</a>
+        <a href="/logout">Logout</a>
+    </div>
+    
+    <div class="container">
+        <h2>All Orders</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>User Info</th>
+                    <th>Drug</th>
+                    <th>Category</th>
+                    <th>Qty</th>
+                    <th>Price (₹)</th>
+                    <th>Total (₹)</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Update</th>
+                </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>
+                        {{ order.user_name }}<br>
+                        {{ order.user_email }}<br>
+                        {{ order.user_phone }}<br>
+                        {{ order.user_address }}
+                    </td>
+                    <td>{{ order.drug_name }}</td>
+                    <td>{{ order.category }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>{{ order.price }}</td>
+                    <td>{{ order.total_amount }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td class="status-{{ order.status|lower|replace(' ', '') }}">{{ order.status }}</td>
+                    <td>
+                        <select onchange="updateStatus({{ order.id }}, this.value)">
+                            <option value="Order Placed" {% if order.status == 'Order Placed' %}selected{% endif %}>Order Placed</option>
+                            <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        function updateStatus(orderId, status) {
+            if (confirm('Update order status to ' + status + '?')) {
+                window.location.href = '/admin/updateorderstatus/' + orderId + '/' + status;
+            }
+        }
+    </script>
+</body>
+</html>

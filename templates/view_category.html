@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Categories - Pharma Choice</title>
+    <link href="../static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/addcategory">Add Category</a>
+        <a href="/admin/viewcategory">View Category</a>
+        <a href="/admin/adddrug">Add Drug</a>
+        <a href="/admin/viewdrugs">View Drugs</a>
+        <a href="/admin/vieworders">View Orders</a>
+        <a href="/logout">Logout</a>
+    </div>
+    
+    <div class="container">
+        <h2>Available Categories</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Category Name</th>
+                    <th>Created Date</th>
+                    <th>Action</th>
+                </thead
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td>{{ cat.category_name }}</td>
+                    <td>{{ cat.created_at }}</td>
+                    <td><a href="/admin/deletecategory/{{ cat.id }}" class="btn-delete" onclick="return confirm('Delete this category?')">Delete</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
