@@ -11,7 +11,7 @@ body {
 
 /* ==================== NAVBAR ==================== */
 .navbar {
-    background-color: #1a1a2e;
+    background-color: #3737b2;
     padding: 15px 30px;
     display: flex;
     justify-content: flex-end;
@@ -33,7 +33,7 @@ body {
 
 /* ==================== HERO SECTION ==================== */
 .hero {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    background: linear-gradient(135deg, #36cade, #16213e);
     color: white;
     text-align: center;
     padding: 80px 20px;
@@ -50,7 +50,7 @@ body {
 }
 
 .btn-hero {
-    background-color: #e94560;
+    background: linear-gradient(135deg, #d23827, #a2db70);
     color: white;
     padding: 12px 30px;
     text-decoration: none;
@@ -495,3 +495,140 @@ body {
     margin: 0 auto;
     padding: 20px;
 }
+
+    
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        
+        .welcome-section {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .welcome-section h2 {
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .stat-card .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .quick-actions {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .quick-actions h3 {
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-action {
+            background: #1a1a2e;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .btn-action:hover {
+            background: #e94560;
+            transform: translateY(-2px);
+        }
+        
+        .navbar {
+            background: #1a1a2e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+        
+        .navbar a:hover {
+            background: #e94560;
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    .low-stock-section{
+                    background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
