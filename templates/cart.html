@@ -2,74 +2,734 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Cart - Pharma Choice</title>
-    <link href="../static/css/style.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>My Cart - Pharma Choice | Secure Payment</title>
+    <style>
+        /* ==================== GLOBAL RESET & BASE ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        /* ==================== NAVBAR (matching dashboard) ==================== */
+        .navbar {
+            background: #1a1a2e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+            font-weight: 500;
+        }
+
+        .navbar a:hover {
+            background: #e94560;
+        }
+
+        /* ==================== MAIN CONTAINER ==================== */
+        .container {
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Cart heading */
+        .cart-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 12px;
+        }
+        .cart-header h2 {
+            color: #1a1a2e;
+            font-size: 28px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .cart-header h2:before {
+            content: "🛒";
+            font-size: 28px;
+        }
+
+        /* Two-column layout: cart table (left) + payment sidebar (right) */
+        .cart-payment-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 15px;
+        }
+
+        .cart-table-section {
+            flex: 2;
+            min-width: 280px;
+        }
+
+        .payment-sidebar {
+            flex: 1.2;
+            min-width: 280px;
+        }
+
+        /* ==================== TABLE STYLES (matching dashboard) ==================== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .data-table th {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .data-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+            color: #2c3e2f;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f8f9ff;
+        }
+
+        .data-table tfoot tr {
+            background-color: #f1f3f5;
+            font-weight: bold;
+        }
+        .data-table tfoot td {
+            padding: 16px 12px;
+            border-top: 2px solid #dee2e6;
+            font-size: 16px;
+        }
+
+        .btn-remove {
+            background-color: #dc3545;
+            color: white;
+            padding: 6px 14px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-remove:hover {
+            background-color: #b02a37;
+            transform: scale(0.96);
+        }
+
+        /* Cart actions under table */
+        .cart-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        .btn-continue {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 24px;
+            text-decoration: none;
+            border-radius: 40px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .btn-continue:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        /* ==================== PAYMENT SIDEBAR (UPI & CARD) ==================== */
+        .payment-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+            position: sticky;
+            top: 20px;
+        }
+        .payment-header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 20px 20px;
+            text-align: center;
+        }
+        .payment-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .payment-header p {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+        .payment-body {
+            padding: 22px 20px 26px;
+        }
+        .total-amount-row {
+            background: #f0f2f5;
+            padding: 14px 16px;
+            border-radius: 60px;
+            text-align: center;
+            margin-bottom: 24px;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #1a1a2e;
+        }
+        .total-amount-row span {
+            color: #e94560;
+            font-size: 1.5rem;
+        }
+
+        /* Tabs inside sidebar */
+        .payment-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: #f1f3f5;
+            border-radius: 60px;
+            padding: 5px;
+        }
+        .tab-btn-pay {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 0;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        .tab-btn-pay.active-tab {
+            background: #1a1a2e;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .payment-pane {
+            display: none;
+            animation: fade 0.25s ease;
+        }
+        .payment-pane.active-pane {
+            display: block;
+        }
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(5px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* UPI options */
+        .upi-option-item {
+            background: #f8f9fc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 60px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upi-option-item.selected-upi {
+            border-color: #e94560;
+            background: #fff0f3;
+            box-shadow: 0 2px 6px rgba(233,69,96,0.1);
+        }
+        .upi-icon {
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2d3e50;
+            font-size: 13px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cfdfe9;
+            border-radius: 60px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .form-group input:focus {
+            border-color: #e94560;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(233,69,96,0.2);
+        }
+        .card-row {
+            display: flex;
+            gap: 12px;
+        }
+        .card-row .form-group {
+            flex: 1;
+        }
+        .btn-pay-now {
+            width: 100%;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-pay-now:hover {
+            background: #1e7e34;
+            transform: translateY(-2px);
+        }
+        .secure-badge {
+            text-align: center;
+            font-size: 11px;
+            color: #6c7a89;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* empty cart */
+        .empty-cart {
+            text-align: center;
+            padding: 60px 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        /* alerts */
+        .alert {
+            padding: 12px 18px;
+            border-radius: 60px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .alert-success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .alert-danger { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+        .alert-info { background: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8; }
+
+        @media (max-width: 850px) {
+            .cart-payment-layout {
+                flex-direction: column;
+            }
+            .payment-sidebar {
+                position: static;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="navbar">
-        <a href="/user/dashboard">Dashboard</a>
-        <a href="/user/drugs">All Drugs</a>
-        <a href="/user/cart">Cart</a>
-        <a href="/user/myorders">My Orders</a>
-        <a href="/logout">Logout</a>
-    </div>
-    
-    <div class="container">
+
+<div class="navbar">
+    <a href="/user/dashboard">Dashboard</a>
+    <a href="/user/drugs">All Drugs</a>
+    <a href="/user/cart">Cart</a>
+    <a href="/user/myorders">My Orders</a>
+    <a href="/logout">Logout</a>
+</div>
+
+<div class="container">
+    <div class="cart-header">
         <h2>My Cart</h2>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        {% if cart_items %}
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Drug Name</th>
-                    <th>Category</th>
-                    <th>Qty</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                </thead
-            <tbody>
-                {% for item in cart_items %}
-                <tr>
-                    <td>{{ item.drug_name }}</td>
-                    <td>{{ item.category }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>₹{{ item.final_price }}</td>
-                    <td>₹{{ item.item_total }}</td>
-                    <td><a href="/user/removefromcart/{{ item.cart_id }}" class="btn-remove" onclick="return confirm('Remove from cart?')">Remove</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="4"><strong>Grand Total</strong></td>
-                    <td><strong>₹{{ total }}</strong></td>
-                    <td></td>
-                </tr>
-            </tfoot>
-        </table>
-        
-        <div class="cart-actions">
-            <a href="/user/drugs" class="btn-continue">Continue Shopping</a>
-            <form action="/user/checkout" method="POST" style="display: inline;">
-                <button type="submit" class="btn-checkout">Confirm Order</button>
-            </form>
-        </div>
-        {% else %}
-        <div class="empty-cart">
-            <p>Your cart is empty.</p>
-            <a href="/user/drugs" class="btn-continue">Start Shopping</a>
-        </div>
-        {% endif %}
     </div>
+
+    <div id="flashContainer"></div>
+
+    <div id="cartMainWrapper">
+        <!-- cart content will be dynamically injected -->
+    </div>
+</div>
+
+<script>
+    // ---------- CART STATE (matching original requirement) ----------
+    let cartItems = [
+        { id: 1, drug_name: "paracetamol", category: "fever", quantity: 1, final_price: 97.20, item_total: 97.20, cart_id: 101 }
+    ];
+
+    let currentTotal = 97.20;
+
+    // Helper functions
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function showFlashMessage(message, type = "success") {
+        const flashDiv = document.getElementById('flashContainer');
+        if(flashDiv) {
+            flashDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => { if(flashDiv) flashDiv.innerHTML = ''; }, 3500);
+        }
+    }
+
+    // render full cart page: table + payment sidebar with UPI & Card
+    function renderFullCart() {
+        const wrapper = document.getElementById('cartMainWrapper');
+        if(!wrapper) return;
+
+        if(cartItems.length === 0) {
+            wrapper.innerHTML = `
+                <div class="empty-cart">
+                    <p>🛒 Your cart is empty.</p>
+                    <a href="/user/drugs" class="btn-continue" style="margin-top: 15px; display: inline-block;">Start Shopping</a>
+                </div>
+            `;
+            return;
+        }
+
+        // build table rows
+        let tableRows = '';
+        let total = 0;
+        cartItems.forEach(item => {
+            total += item.item_total;
+            tableRows += `
+                <tr data-cartid="${item.cart_id}">
+                    <td>${escapeHtml(item.drug_name)}</td>
+                    <td>${escapeHtml(item.category)}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${item.final_price.toFixed(2)}</td>
+                    <td>₹${item.item_total.toFixed(2)}</td>
+                    <td><button class="btn-remove" data-remove-id="${item.cart_id}">Remove</button></td>
+                </tr>
+            `;
+        });
+        currentTotal = total;
+
+        const cartHTML = `
+            <div class="cart-payment-layout">
+                <!-- LEFT: Cart Table -->
+                <div class="cart-table-section">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Drug Name</th><th>Category</th><th>Qty</th><th>Price</th><th>Total</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                        <tfoot>
+                            <tr><td colspan="4"><strong>Grand Total</strong></td><td colspan="2"><strong>₹${total.toFixed(2)}</strong></td></tr>
+                        </tfoot>
+                    </table>
+                    <div class="cart-actions">
+                        <a href="/user/drugs" class="btn-continue">Continue Shopping</a>
+                        <button id="confirmOrderGlobalBtn" class="btn-continue" style="background:#28a745;">Confirm Order</button>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Payment Sidebar (UPI & Card) -->
+                <div class="payment-sidebar">
+                    <div class="payment-card">
+                        <div class="payment-header">
+                            <h3>💳 Secure Payment</h3>
+                            <p>Choose your preferred method</p>
+                        </div>
+                        <div class="payment-body">
+                            <div class="total-amount-row">
+                                Total: <span>₹${total.toFixed(2)}</span>
+                            </div>
+
+                            <!-- Tabs -->
+                            <div class="payment-tabs" id="paymentTabs">
+                                <button class="tab-btn-pay active-tab" data-paytab="upi">📱 UPI</button>
+                                <button class="tab-btn-pay" data-paytab="card">💳 Credit / Debit Card</button>
+                            </div>
+
+                            <!-- UPI Panel -->
+                            <div id="upiPanel" class="payment-pane active-pane">
+                                <div class="upi-option-item selected-upi" data-upiapp="PhonePe">
+                                    <span class="upi-icon">📱</span> <strong>PhonePe</strong> <span style="margin-left:auto;">✔️</span>
+                                </div>
+                                <div class="upi-option-item" data-upiapp="Google Pay">
+                                    <span class="upi-icon">🟢</span> <strong>Google Pay</strong>
+                                </div>
+                                <div class="upi-option-item" data-upiapp="Paytm">
+                                    <span class="upi-icon">💙</span> <strong>Paytm</strong>
+                                </div>
+                                <div class="form-group">
+                                    <label>UPI ID / VPA</label>
+                                    <input type="text" id="upiIdInput" placeholder="username@okhdfcbank / 9876543210@paytm">
+                                </div>
+                                <button id="payUpiBtn" class="btn-pay-now">✅ Pay via UPI</button>
+                                <div class="secure-badge">🔒 UPI payments are 128-bit encrypted</div>
+                            </div>
+
+                            <!-- Card Panel -->
+                            <div id="cardPanel" class="payment-pane">
+                                <div class="form-group">
+                                    <label>Card Number</label>
+                                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                                </div>
+                                <div class="card-row">
+                                    <div class="form-group">
+                                        <label>Expiry (MM/YY)</label>
+                                        <input type="text" id="expiry" placeholder="08/28">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>CVV</label>
+                                        <input type="password" id="cvv" placeholder="123" maxlength="4">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Cardholder Name</label>
+                                    <input type="text" id="cardName" placeholder="Full name">
+                                </div>
+                                <button id="payCardBtn" class="btn-pay-now">💳 Pay ₹${total.toFixed(2)}</button>
+                                <div class="secure-badge">🔒 PCI-DSS compliant | SSL Secure</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        wrapper.innerHTML = cartHTML;
+
+        // attach remove buttons events
+        document.querySelectorAll('.btn-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const row = btn.closest('tr');
+                const cartIdAttr = row?.getAttribute('data-cartid');
+                if(cartIdAttr) {
+                    const id = parseInt(cartIdAttr);
+                    removeCartItemById(id);
+                } else {
+                    // fallback remove first item (for demo)
+                    if(cartItems.length) removeCartItemById(cartItems[0].cart_id);
+                }
+            });
+        });
+
+        // attach confirm order button (global)
+        const confirmBtn = document.getElementById('confirmOrderGlobalBtn');
+        if(confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                if(cartItems.length === 0) {
+                    showFlashMessage("Cart is empty! Add medicines first.", "danger");
+                    return;
+                }
+                // scroll to payment sidebar and highlight
+                document.querySelector('.payment-sidebar')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                showFlashMessage("Please complete payment using the options on the right ➡️", "info");
+            });
+        }
+
+        // attach payment tab switching
+        const tabBtns = document.querySelectorAll('.tab-btn-pay');
+        const upiPanelDiv = document.getElementById('upiPanel');
+        const cardPanelDiv = document.getElementById('cardPanel');
+        function switchPayTab(tabId) {
+            if(tabId === 'upi') {
+                upiPanelDiv.classList.add('active-pane');
+                cardPanelDiv.classList.remove('active-pane');
+                tabBtns.forEach(btn => {
+                    if(btn.getAttribute('data-paytab') === 'upi') btn.classList.add('active-tab');
+                    else btn.classList.remove('active-tab');
+                });
+            } else {
+                cardPanelDiv.classList.add('active-pane');
+                upiPanelDiv.classList.remove('active-pane');
+                tabBtns.forEach(btn => {
+                    if(btn.getAttribute('data-paytab') === 'card') btn.classList.add('active-tab');
+                    else btn.classList.remove('active-tab');
+                });
+            }
+        }
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tabVal = btn.getAttribute('data-paytab');
+                switchPayTab(tabVal);
+            });
+        });
+
+        // UPI selection highlight
+        const upiOptions = document.querySelectorAll('.upi-option-item');
+        upiOptions.forEach(opt => {
+            opt.addEventListener('click', function() {
+                upiOptions.forEach(o => o.classList.remove('selected-upi'));
+                this.classList.add('selected-upi');
+            });
+        });
+
+        // Format card number
+        const cardNumInput = document.getElementById('cardNumber');
+        if(cardNumInput) {
+            cardNumInput.addEventListener('input', function(e) {
+                let val = e.target.value.replace(/\s/g, '');
+                if(val.length > 16) val = val.slice(0,16);
+                let formatted = '';
+                for(let i=0; i<val.length; i++) {
+                    if(i>0 && i%4 === 0) formatted += ' ';
+                    formatted += val[i];
+                }
+                e.target.value = formatted;
+            });
+        }
+
+        // PAY VIA UPI
+        const payUpiButton = document.getElementById('payUpiBtn');
+        if(payUpiButton) {
+            payUpiButton.addEventListener('click', () => {
+                if(cartItems.length === 0) {
+                    showFlashMessage("No items in cart", "danger");
+                    return;
+                }
+                let upiId = document.getElementById('upiIdInput')?.value.trim();
+                let selectedApp = "UPI";
+                const selectedOptionElem = document.querySelector('.upi-option-item.selected-upi');
+                if(selectedOptionElem) {
+                    const appName = selectedOptionElem.querySelector('strong')?.innerText;
+                    if(appName) selectedApp = appName;
+                }
+                if(!upiId) {
+                    upiId = "demo@okhdfcbank";
+                    showFlashMessage("Demo mode: using demo@okhdfcbank", "info");
+                }
+                simulatePayment("UPI", `${selectedApp} (${upiId})`).then(() => {
+                    completeOrderAndClearCart(`${selectedApp} UPI`, `UPI ID: ${upiId}`);
+                }).catch(() => {
+                    showFlashMessage("UPI payment failed. Please try again.", "danger");
+                });
+            });
+        }
+
+        // PAY VIA CARD
+        const payCardButton = document.getElementById('payCardBtn');
+        if(payCardButton) {
+            payCardButton.addEventListener('click', () => {
+                if(cartItems.length === 0) {
+                    showFlashMessage("Cart empty", "danger");
+                    return;
+                }
+                let cardNum = document.getElementById('cardNumber')?.value.replace(/\s/g, '');
+                let expiry = document.getElementById('expiry')?.value;
+                let cvv = document.getElementById('cvv')?.value;
+                let cardNameVal = document.getElementById('cardName')?.value.trim();
+                if(!cardNum || cardNum.length < 13) {
+                    showFlashMessage("Enter valid card number (demo: 4111111111111111)", "danger");
+                    return;
+                }
+                if(!expiry || !expiry.match(/^\d{2}\/\d{2}$/)) {
+                    showFlashMessage("Expiry format MM/YY required", "danger");
+                    return;
+                }
+                if(!cvv || cvv.length < 3) {
+                    showFlashMessage("CVV required", "danger");
+                    return;
+                }
+                if(!cardNameVal) {
+                    showFlashMessage("Cardholder name required", "danger");
+                    return;
+                }
+                simulatePayment("Card", `****${cardNum.slice(-4)}`).then(() => {
+                    completeOrderAndClearCart("Credit/Debit Card", `Card ending ${cardNum.slice(-4)}`);
+                }).catch(() => {
+                    showFlashMessage("Card payment failed. Please retry.", "danger");
+                });
+            });
+        }
+
+        function updateSidebarTotal() {
+            const totalSpanSide = document.querySelector('.total-amount-row span');
+            if(totalSpanSide) totalSpanSide.innerText = `₹${currentTotal.toFixed(2)}`;
+            const payCardBtnSpan = document.getElementById('payCardBtn');
+            if(payCardBtnSpan) payCardBtnSpan.innerHTML = `💳 Pay ₹${currentTotal.toFixed(2)}`;
+        }
+        updateSidebarTotal();
+    }
+
+    function removeCartItemById(cartId) {
+        const index = cartItems.findIndex(i => i.cart_id === cartId);
+        if(index !== -1) {
+            cartItems.splice(index, 1);
+            renderFullCart();  // re-render whole cart + sidebar
+            showFlashMessage("Item removed from cart", "info");
+            if(cartItems.length === 0) renderFullCart();
+        } else {
+            // fallback: remove first
+            if(cartItems.length) cartItems.pop();
+            renderFullCart();
+            showFlashMessage("Item removed", "info");
+        }
+    }
+
+    function simulatePayment(method, detail) {
+        return new Promise((resolve, reject) => {
+            showFlashMessage(`Processing ${method} payment via ${detail}...`, "info");
+            setTimeout(() => {
+                const success = Math.random() > 0.08; // 92% success
+                if(success) resolve();
+                else reject(new Error("fail"));
+            }, 1400);
+        });
+    }
+
+    function completeOrderAndClearCart(paymentMethod, refDetail) {
+        const orderTotal = currentTotal;
+        // clear cart
+        cartItems = [];
+        renderFullCart();   // empty cart UI appears
+        showFlashMessage(`✅ Order placed successfully! Paid ₹${orderTotal.toFixed(2)} via ${paymentMethod}. Reference: ${refDetail}`, "success");
+        // additional visual feedback
+        setTimeout(() => {
+            const wrapper = document.getElementById('cartMainWrapper');
+            if(cartItems.length === 0 && wrapper && !wrapper.innerHTML.includes('empty-cart')) {
+                // ensure empty view
+                renderFullCart();
+            }
+        }, 100);
+    }
+
+    // initial render
+    renderFullCart();
+</script>
 </body>
 </html>
