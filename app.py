@@ -283,24 +283,31 @@ def view_cart():
     cart_items, total = Dbtransactions().getCart(session['user_id'])
     return render_template("cart.html", cart_items=cart_items, total=total)
 
-@app.route('/user/removefromcart/<int:cart_id>')
+@app.route('/user/removefromcart/<int:cart_id>', methods=['POST'])
 @login_required
 @user_required
 def remove_from_cart(cart_id):
-    Dbtransactions().removeFromCart(cart_id)
-    flash("Item removed from cart!", "success")
-    return redirect(url_for('view_cart'))
+    try:
+        Dbtransactions().removeFromCart(cart_id)
+        return jsonify({"success": True, "message": "Item removed from cart!"})
+    except Exception as e:
+        return jsonify({"success": False, "message": "Error removing item"})
 
 @app.route('/user/checkout', methods=['POST'])
 @login_required
 @user_required
 def checkout():
-    if Dbtransactions().placeOrder(session['user_id']):
-        flash("Order placed successfully!", "success")
-        return redirect(url_for('my_orders'))
-    else:
-        flash("Your cart is empty!", "error")
-        return redirect(url_for('view_cart'))
+    try:
+        data = request.get_json()
+        payment_method = data.get('payment_method', 'Unknown')
+        
+        if Dbtransactions().placeOrder(session['user_id']):
+            return jsonify({"success": True, "message": f"Order placed successfully! Paid via {payment_method}"})
+        else:
+            return jsonify({"success": False, "message": "Your cart is empty!"})
+    except Exception as e:
+        print(f"Checkout error: {e}")
+        return jsonify({"success": False, "message": "Error placing order"})
 
 @app.route('/user/myorders')
 @login_required
@@ -323,7 +330,12 @@ def get_drug_details(drug_id):
     except Exception as e:
         print(f"Error getting drug details: {e}")
         return jsonify({"drug": None})
-
+@app.route('/user/cart/data')
+@login_required
+@user_required
+def cart_data():
+    cart_items, total = Dbtransactions().getCart(session['user_id'])
+    return jsonify({"cart_items": cart_items, "total": total})
 
 if __name__ == "__main__":
     app.run(debug=True)
