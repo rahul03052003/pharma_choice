@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Cart - Pharma Choice</title>
     <link href="../static/css/style.css" rel="stylesheet">
+    <script type="text/javascript" src="../static/js/validations.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; }
@@ -58,10 +59,12 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            width: 450px;
+            width: 500px;
             max-width: 90%;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             animation: slideIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         @keyframes slideIn {
             from { transform: translateY(-50px); opacity: 0; }
@@ -99,8 +102,8 @@
         .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; transition: border 0.2s; }
         .form-group input:focus { outline: none; border-color: #e94560; box-shadow: 0 0 0 2px rgba(233,69,96,0.2); }
         
-        .upi-options { display: flex; gap: 10px; margin-bottom: 15px; }
-        .upi-app { flex: 1; text-align: center; padding: 12px; border: 2px solid #ddd; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+        .upi-options { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .upi-app { flex: 1; text-align: center; padding: 12px; border: 2px solid #ddd; border-radius: 10px; cursor: pointer; transition: all 0.2s; min-width: 80px; }
         .upi-app.selected { border-color: #e94560; background: #fff0f3; }
         .upi-app:hover { border-color: #e94560; }
         
@@ -121,18 +124,23 @@
             transition: background 0.3s;
         }
         .btn-pay:hover { background: #1e7e34; }
+        .btn-pay:disabled { background: #6c757d; cursor: not-allowed; }
         
-        .netbanking-options { display: flex; flex-direction: column; gap: 10px; }
+        .netbanking-options { display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; }
         .bank-option { display: flex; align-items: center; gap: 15px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
         .bank-option.selected { border-color: #e94560; background: #fff0f3; }
         .bank-option:hover { border-color: #e94560; }
         .bank-option input { width: auto; margin: 0; }
         
-        .secure-badge { text-align: center; margin-top: 15px; font-size: 12px; color: #666; display: flex; justify-content: center; gap: 10px; }
+        .secure-badge { text-align: center; margin-top: 15px; font-size: 12px; color: #666; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        
+        .error-message { color: #dc3545; font-size: 12px; margin-top: 5px; display: block; }
+        .success-message { color: #28a745; font-size: 12px; margin-top: 5px; display: block; }
         
         @media (max-width: 768px) {
             .cart-actions { flex-direction: column; }
             .card-row { flex-direction: column; gap: 0; }
+            .upi-options { flex-wrap: wrap; }
         }
     </style>
 </head>
@@ -181,12 +189,14 @@
                 <div class="form-group">
                     <label>UPI ID / VPA</label>
                     <input type="text" id="upiId" placeholder="username@okhdfcbank or 9876543210@paytm">
+                    <span id="upiError" class="error-message"></span>
+                    <span id="upiSuccess" class="success-message"></span>
                 </div>
                 <div class="secure-badge">
                     <span>🔒 UPI Secure</span>
                     <span>⚡ Instant Payment</span>
                 </div>
-                <button class="btn-pay" onclick="processPayment('UPI')">✅ Pay Now via UPI</button>
+                <button class="btn-pay" id="upiPayBtn" onclick="validateAndProcessUPI()">✅ Pay Now via UPI</button>
             </div>
             
             <!-- Card Panel -->
@@ -194,26 +204,30 @@
                 <div class="form-group">
                     <label>Card Number</label>
                     <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                    <span id="cardError" class="error-message"></span>
                 </div>
                 <div class="card-row">
                     <div class="form-group">
                         <label>Expiry Date</label>
                         <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+                        <span id="expiryError" class="error-message"></span>
                     </div>
                     <div class="form-group">
                         <label>CVV</label>
                         <input type="password" id="cvv" placeholder="123" maxlength="4">
+                        <span id="cvvError" class="error-message"></span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Cardholder Name</label>
                     <input type="text" id="cardName" placeholder="Name on card">
+                    <span id="cardNameError" class="error-message"></span>
                 </div>
                 <div class="secure-badge">
                     <span>🔒 PCI DSS Compliant</span>
                     <span>💳 Visa / Mastercard / RuPay</span>
                 </div>
-                <button class="btn-pay" onclick="processPayment('Card')">💳 Pay Now via Card</button>
+                <button class="btn-pay" id="cardPayBtn" onclick="validateAndProcessCard()">💳 Pay Now via Card</button>
             </div>
             
             <!-- Net Banking Panel -->
@@ -238,16 +252,18 @@
                 <div class="form-group">
                     <label>Net Banking ID / Customer ID</label>
                     <input type="text" id="netbankingId" placeholder="Enter your customer ID">
+                    <span id="netIdError" class="error-message"></span>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" id="netbankingPassword" placeholder="Enter your password">
+                    <span id="netPassError" class="error-message"></span>
                 </div>
                 <div class="secure-badge">
                     <span>🔒 256-bit SSL Secure</span>
                     <span>🏦 All Major Banks</span>
                 </div>
-                <button class="btn-pay" onclick="processPayment('Net Banking')">🏦 Pay Now via Net Banking</button>
+                <button class="btn-pay" id="netPayBtn" onclick="validateAndProcessNetBanking()">🏦 Pay Now via Net Banking</button>
             </div>
         </div>
     </div>
@@ -341,73 +357,288 @@
             }
             document.getElementById('paymentAmount').innerHTML = `Total: ₹${currentCartTotal.toFixed(2)}`;
             document.getElementById('paymentModal').style.display = 'flex';
+            
+            // Reset all validation messages
+            clearAllValidationMessages();
         }
 
         function closePaymentModal() {
             document.getElementById('paymentModal').style.display = 'none';
-            // Reset forms
+            resetPaymentForms();
+        }
+
+        function resetPaymentForms() {
+            // Reset UPI
             document.getElementById('upiId').value = '';
+            document.getElementById('upiError').innerHTML = '';
+            document.getElementById('upiSuccess').innerHTML = '';
+            
+            // Reset Card
             document.getElementById('cardNumber').value = '';
             document.getElementById('expiry').value = '';
             document.getElementById('cvv').value = '';
             document.getElementById('cardName').value = '';
+            document.getElementById('cardError').innerHTML = '';
+            document.getElementById('expiryError').innerHTML = '';
+            document.getElementById('cvvError').innerHTML = '';
+            document.getElementById('cardNameError').innerHTML = '';
+            
+            // Reset Net Banking
             document.getElementById('netbankingId').value = '';
             document.getElementById('netbankingPassword').value = '';
+            document.getElementById('netIdError').innerHTML = '';
+            document.getElementById('netPassError').innerHTML = '';
+            
+            // Reset button states
+            const buttons = document.querySelectorAll('.btn-pay');
+            buttons.forEach(btn => { btn.disabled = false; btn.innerHTML = btn.innerHTML.replace('⏳ PROCESSING...', btn.innerHTML.includes('UPI') ? '✅ Pay Now via UPI' : btn.innerHTML.includes('Card') ? '💳 Pay Now via Card' : '🏦 Pay Now via Net Banking'); });
         }
 
-        function processPayment(method) {
-            let paymentDetail = '';
-            let isValid = true;
+        function clearAllValidationMessages() {
+            // Clear UPI
+            document.getElementById('upiError').innerHTML = '';
+            document.getElementById('upiSuccess').innerHTML = '';
             
-            if (method === 'UPI') {
-                const upiId = document.getElementById('upiId').value.trim();
-                if (!upiId) {
-                    showFlash('Please enter UPI ID', 'error');
-                    isValid = false;
-                } else {
-                    paymentDetail = `${selectedUpiApp} - ${upiId}`;
-                }
-            } 
-            else if (method === 'Card') {
-                const cardNum = document.getElementById('cardNumber').value.replace(/\s/g, '');
-                const expiry = document.getElementById('expiry').value;
-                const cvv = document.getElementById('cvv').value;
-                const cardName = document.getElementById('cardName').value.trim();
-                
-                if (!cardNum || cardNum.length < 13) {
-                    showFlash('Please enter valid card number', 'error');
-                    isValid = false;
-                } else if (!expiry || !expiry.match(/^\d{2}\/\d{2}$/)) {
-                    showFlash('Please enter valid expiry (MM/YY)', 'error');
-                    isValid = false;
-                } else if (!cvv || cvv.length < 3) {
-                    showFlash('Please enter valid CVV', 'error');
-                    isValid = false;
-                } else if (!cardName) {
-                    showFlash('Please enter cardholder name', 'error');
-                    isValid = false;
-                } else {
-                    paymentDetail = `Card ending with ${cardNum.slice(-4)}`;
-                }
-            } 
-            else if (method === 'Net Banking') {
-                const netId = document.getElementById('netbankingId').value.trim();
-                const netPass = document.getElementById('netbankingPassword').value;
-                
-                if (!netId) {
-                    showFlash('Please enter Customer ID', 'error');
-                    isValid = false;
-                } else if (!netPass) {
-                    showFlash('Please enter password', 'error');
-                    isValid = false;
-                } else {
-                    paymentDetail = `${selectedBank} Bank - ${netId}`;
+            // Clear Card
+            document.getElementById('cardError').innerHTML = '';
+            document.getElementById('expiryError').innerHTML = '';
+            document.getElementById('cvvError').innerHTML = '';
+            document.getElementById('cardNameError').innerHTML = '';
+            
+            // Clear Net Banking
+            document.getElementById('netIdError').innerHTML = '';
+            document.getElementById('netPassError').innerHTML = '';
+        }
+
+        // ==================== UPI VALIDATION ====================
+        
+        function validateUPIId(upiId) {
+            const upiPatterns = [
+                /^[a-zA-Z][a-zA-Z0-9._-]*@(okhdfcbank|icici|sbi|axis|hdfcbank|kaypay|upi)$/i,
+                /^[6-9][0-9]{9}@paytm$/,
+                /^[a-zA-Z][a-zA-Z0-9._-]*@(ybl|apl)$/i,
+                /^[a-zA-Z][a-zA-Z0-9._-]*@(airtel|freecharge)$/i
+            ];
+            
+            for (let pattern of upiPatterns) {
+                if (pattern.test(upiId)) {
+                    return true;
                 }
             }
+            return false;
+        }
+
+        function validateUPIRealtime() {
+            const upiId = document.getElementById('upiId').value.trim();
+            const upiError = document.getElementById('upiError');
+            const upiSuccess = document.getElementById('upiSuccess');
             
-            if (!isValid) return;
+            if (upiId.length === 0) {
+                upiError.innerHTML = '';
+                upiSuccess.innerHTML = '';
+                return false;
+            }
             
-            // Process payment
+            if (validateUPIId(upiId)) {
+                upiError.innerHTML = '';
+                upiSuccess.innerHTML = '✓ Valid UPI ID';
+                return true;
+            } else {
+                upiError.innerHTML = '❌ Invalid UPI ID. Format: username@bankname or mobile@paytm';
+                upiSuccess.innerHTML = '';
+                return false;
+            }
+        }
+
+        function validateAndProcessUPI() {
+            const upiId = document.getElementById('upiId').value.trim();
+            
+            // Clear previous errors
+            document.getElementById('upiError').innerHTML = '';
+            
+            if (upiId === "") {
+                document.getElementById('upiError').innerHTML = "UPI ID is required";
+                showFlash('Please enter UPI ID', 'error');
+                document.getElementById('upiId').focus();
+                return false;
+            }
+            
+            if (!validateUPIId(upiId)) {
+                document.getElementById('upiError').innerHTML = "Invalid UPI ID format";
+                showFlash('Invalid UPI ID! Use format: username@bankname or mobile@paytm', 'error');
+                document.getElementById('upiId').focus();
+                return false;
+            }
+            
+            processPayment('UPI', `${selectedUpiApp} - ${upiId}`);
+        }
+
+        // ==================== CARD VALIDATION ====================
+        
+        function validateLuhn(cardNumber) {
+            let sum = 0;
+            let isEven = false;
+            for (let i = cardNumber.length - 1; i >= 0; i--) {
+                let digit = parseInt(cardNumber.charAt(i), 10);
+                if (isEven) {
+                    digit *= 2;
+                    if (digit > 9) digit -= 9;
+                }
+                sum += digit;
+                isEven = !isEven;
+            }
+            return (sum % 10) === 0;
+        }
+
+        function validateCardNumber(cardNum) {
+            const cardNumClean = cardNum.replace(/\s/g, '');
+            if (cardNumClean.length < 13 || cardNumClean.length > 19) return false;
+            if (!/^\d+$/.test(cardNumClean)) return false;
+            return validateLuhn(cardNumClean);
+        }
+
+        function getCardType(cardNum) {
+            const patterns = {
+                'Visa': /^4/,
+                'Mastercard': /^5[1-5]/,
+                'RuPay': /^6[0-9]/,
+                'American Express': /^3[47]/
+            };
+            for (let [type, pattern] of Object.entries(patterns)) {
+                if (pattern.test(cardNum)) return type;
+            }
+            return 'Unknown';
+        }
+
+        function validateExpiry(expiry) {
+            if (!expiry.match(/^\d{2}\/\d{2}$/)) return false;
+            const [month, year] = expiry.split('/');
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear() % 100;
+            const currentMonth = currentDate.getMonth() + 1;
+            
+            if (parseInt(month) < 1 || parseInt(month) > 12) return false;
+            if (parseInt(year) < currentYear) return false;
+            if (parseInt(year) === currentYear && parseInt(month) < currentMonth) return false;
+            return true;
+        }
+
+        function validateCVV(cvv) {
+            return /^\d{3,4}$/.test(cvv);
+        }
+
+        function validateCardName(name) {
+            return name.trim().length >= 3 && /^[a-zA-Z\s]+$/.test(name);
+        }
+
+        function validateAndProcessCard() {
+            const cardNum = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const expiry = document.getElementById('expiry').value;
+            const cvv = document.getElementById('cvv').value;
+            const cardName = document.getElementById('cardName').value.trim();
+            
+            // Clear previous errors
+            document.getElementById('cardError').innerHTML = '';
+            document.getElementById('expiryError').innerHTML = '';
+            document.getElementById('cvvError').innerHTML = '';
+            document.getElementById('cardNameError').innerHTML = '';
+            
+            let isValid = true;
+            
+            if (!cardNum) {
+                document.getElementById('cardError').innerHTML = "Card number is required";
+                isValid = false;
+            } else if (!validateCardNumber(cardNum)) {
+                document.getElementById('cardError').innerHTML = "Invalid card number";
+                isValid = false;
+            } else {
+                const cardType = getCardType(cardNum);
+                document.getElementById('cardError').innerHTML = `✓ ${cardType}`;
+                document.getElementById('cardError').style.color = 'green';
+            }
+            
+            if (!expiry) {
+                document.getElementById('expiryError').innerHTML = "Expiry date is required";
+                isValid = false;
+            } else if (!validateExpiry(expiry)) {
+                document.getElementById('expiryError').innerHTML = "Invalid expiry date (MM/YY)";
+                isValid = false;
+            }
+            
+            if (!cvv) {
+                document.getElementById('cvvError').innerHTML = "CVV is required";
+                isValid = false;
+            } else if (!validateCVV(cvv)) {
+                document.getElementById('cvvError').innerHTML = "CVV must be 3-4 digits";
+                isValid = false;
+            }
+            
+            if (!cardName) {
+                document.getElementById('cardNameError').innerHTML = "Cardholder name is required";
+                isValid = false;
+            } else if (!validateCardName(cardName)) {
+                document.getElementById('cardNameError').innerHTML = "Enter valid name (letters only)";
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                showFlash('Please fix the errors above', 'error');
+                return false;
+            }
+            
+            processPayment('Card', `${getCardType(cardNum)} ending with ${cardNum.slice(-4)}`);
+        }
+
+        // ==================== NET BANKING VALIDATION ====================
+        
+        function validateAndProcessNetBanking() {
+            const netId = document.getElementById('netbankingId').value.trim();
+            const netPass = document.getElementById('netbankingPassword').value;
+            
+            // Clear previous errors
+            document.getElementById('netIdError').innerHTML = '';
+            document.getElementById('netPassError').innerHTML = '';
+            
+            let isValid = true;
+            
+            if (!netId) {
+                document.getElementById('netIdError').innerHTML = "Customer ID is required";
+                isValid = false;
+            } else if (netId.length < 4) {
+                document.getElementById('netIdError').innerHTML = "Customer ID must be at least 4 characters";
+                isValid = false;
+            }
+            
+            if (!netPass) {
+                document.getElementById('netPassError').innerHTML = "Password is required";
+                isValid = false;
+            } else if (netPass.length < 4) {
+                document.getElementById('netPassError').innerHTML = "Password must be at least 4 characters";
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                showFlash('Please fix the errors above', 'error');
+                return false;
+            }
+            
+            processPayment('Net Banking', `${selectedBank} Bank - ${netId}`);
+        }
+
+        // ==================== PROCESS PAYMENT ====================
+        
+        function processPayment(method, paymentDetail) {
+            // Disable all payment buttons
+            const buttons = document.querySelectorAll('.btn-pay');
+            buttons.forEach(btn => { btn.disabled = true; });
+            
+            // Show processing message on the active button
+            const activePanel = document.querySelector('.payment-panel.active');
+            const activeBtn = activePanel.querySelector('.btn-pay');
+            if (activeBtn) activeBtn.innerHTML = '⏳ PROCESSING...';
+            
+            showFlash(`Processing ${method} payment via ${paymentDetail}...`, 'success');
+            
             fetch('/user/checkout', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -424,22 +655,26 @@
                     showFlash(`✅ ${data.message}`, 'success');
                     loadCart();
                     updateCartCount();
-                    // Redirect to orders page after 2 seconds
                     setTimeout(() => {
                         window.location.href = '/user/myorders';
-                    }, 1500);
+                    }, 2000);
                 } else {
                     showFlash(data.message, 'error');
+                    // Re-enable buttons
+                    buttons.forEach(btn => { btn.disabled = false; });
+                    if (activeBtn) activeBtn.innerHTML = activeBtn.innerHTML.includes('UPI') ? '✅ Pay Now via UPI' : activeBtn.innerHTML.includes('Card') ? '💳 Pay Now via Card' : '🏦 Pay Now via Net Banking';
                 }
             })
             .catch(error => {
                 closePaymentModal();
                 console.error('Error:', error);
                 showFlash('Payment failed! Please try again.', 'error');
+                buttons.forEach(btn => { btn.disabled = false; });
             });
         }
 
-        // Initialize payment modal tabs
+        // ==================== EVENT LISTENERS ====================
+        
         function initPaymentTabs() {
             const tabBtns = document.querySelectorAll('.tab-btn');
             const panels = {
@@ -455,6 +690,7 @@
                     btn.classList.add('active');
                     Object.values(panels).forEach(panel => panel.classList.remove('active'));
                     panels[panelId].classList.add('active');
+                    clearAllValidationMessages();
                 });
             });
             
@@ -479,10 +715,14 @@
                     selectedBank = radio.value;
                 });
             });
-        }
-
-        // Format card number with spaces
-        function formatCardNumber() {
+            
+            // UPI real-time validation
+            const upiInput = document.getElementById('upiId');
+            if (upiInput) {
+                upiInput.addEventListener('input', validateUPIRealtime);
+            }
+            
+            // Card number formatting
             const cardInput = document.getElementById('cardNumber');
             if (cardInput) {
                 cardInput.addEventListener('input', function(e) {
@@ -496,10 +736,8 @@
                     e.target.value = formatted;
                 });
             }
-        }
-
-        // Format expiry
-        function formatExpiry() {
+            
+            // Expiry formatting
             const expiryInput = document.getElementById('expiry');
             if (expiryInput) {
                 expiryInput.addEventListener('input', function(e) {
@@ -516,8 +754,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadCart();
             initPaymentTabs();
-            formatCardNumber();
-            formatExpiry();
         });
     </script>
 </body>
